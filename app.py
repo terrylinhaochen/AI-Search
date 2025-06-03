@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+from dotenv import load_dotenv
 from llm_service import LLMService
 from ui_components import (
     render_suggestion_card, 
@@ -8,6 +9,9 @@ from ui_components import (
     render_analysis_debug
 )
 from models import QueryType
+
+# Load environment variables for local development
+load_dotenv()
 
 # Page configuration
 st.set_page_config(
@@ -105,12 +109,20 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 def main():
-    # Check for API key
-    api_key = os.getenv("OPENAI_API_KEY")
+    # Check for API key - try Streamlit secrets first, then environment variables
+    try:
+        api_key = st.secrets["OPENAI_API_KEY"]
+    except (KeyError, FileNotFoundError):
+        api_key = os.getenv("OPENAI_API_KEY")
+    
     if not api_key or api_key == "your_openai_api_key_here":
-        st.error("🔑 Please set your OpenAI API key in the .env file!")
-        st.info("Edit the `.env` file and replace `your_openai_api_key_here` with your actual OpenAI API key.")
+        st.error("🔑 Please set your OpenAI API key!")
+        st.info("For local development: Edit the `.env` file and replace `your_openai_api_key_here` with your actual OpenAI API key.")
+        st.info("For Streamlit Cloud: Add the API key to your app's secrets in the dashboard.")
         st.stop()
+    
+    # Set the API key in environment for the LLM service
+    os.environ["OPENAI_API_KEY"] = api_key
     
     # Initialize LLM service
     if 'llm_service' not in st.session_state:
@@ -174,36 +186,9 @@ def main():
         elif results.content_cards:
             st.markdown("### 🎯 Relevant Content")
             
-            # Display main card (first one) as large block
+            # Display only the first card
             if len(results.content_cards) > 0:
                 render_content_card(results.content_cards[0], is_main=True)
-            
-            # Add expand button for additional results if there are more cards
-            if len(results.content_cards) > 1:
-                # Initialize expand state in session state if not exists
-                if 'show_all_results' not in st.session_state:
-                    st.session_state.show_all_results = False
-                
-                # Expand button
-                col1, col2, col3 = st.columns([1, 2, 1])
-                with col2:
-                    if st.button(
-                        f"📚 Show {len(results.content_cards) - 1} more results" if not st.session_state.show_all_results else "📚 Show less",
-                        key="expand_results",
-                        type="secondary"
-                    ):
-                        st.session_state.show_all_results = not st.session_state.show_all_results
-                        st.rerun()
-                
-                # Show additional cards if expanded
-                if st.session_state.show_all_results:
-                    st.markdown("---")
-                    st.markdown("#### More Content")
-                    
-                    # Display remaining cards in full width with proper formatting
-                    remaining_cards = results.content_cards[1:4]  # Show up to 3 more
-                    for card in remaining_cards:
-                        render_content_card(card, is_main=False)
         
         st.markdown('</div>', unsafe_allow_html=True)
         
