@@ -133,15 +133,14 @@ class LLMService:
         You are creating content cards for a search system. 
         Focus on: {category_prompts.get(intent_category, "general recommendations")}
         
-        Generate 1-5 content cards that form a COHESIVE PROGRESSION and are logically related to each other.
-        The cards should build upon each other or explore different aspects of the same topic.
+        CRITICAL: You must decide how many cards (1-5) to generate based on query complexity:
         
-        Decision criteria for number of cards:
-        - 1 card: Very specific query with one clear answer
-        - 2-3 cards: Query with a few complementary perspectives 
-        - 4-5 cards: Complex topic that benefits from multiple angles
+        - 1 card: Simple, direct queries with one clear answer (e.g., "What is atomic habits about?")
+        - 2 cards: Queries needing two complementary perspectives (e.g., "books on confidence")
+        - 3 cards: Standard queries with moderate complexity (e.g., "dealing with difficult colleagues")
+        - 4-5 cards: Only for complex, multi-faceted topics requiring diverse angles
         
-        Include diverse content types (books, podcasts, audiobooks, articles) when multiple cards are warranted.
+        Each card MUST logically build upon or relate to the previous ones to form a cohesive learning journey.
         
         For each card:
         
@@ -157,10 +156,11 @@ class LLMService:
         - clickable_link: always use "#"
         
         Important: 
-        - Each card should logically connect to or build upon the others
+        - START with the most fundamental/foundational content, then progress to more specific/advanced
+        - Each card should logically flow from the previous one
         - For podcasts, include words like "Podcast", "Episode", "Interview", "Talk" in the book_title
         - source_page should be a string, not a number
-        - Ensure cards form a coherent learning journey or exploration path
+        - Quality over quantity - fewer, better-connected cards are preferred
         """
         
         try:
