@@ -141,7 +141,7 @@ def main():
     
     with col1:
         user_query = st.text_input(
-            "Search Query",
+            "Search for content",
             placeholder="What content are you looking for? Books, podcasts, hosts... Try: 'How to deal with difficult colleagues'",
             key="search_input",
             label_visibility="collapsed"
@@ -184,11 +184,9 @@ def main():
             render_book_recommendation(results.book_recommendation)
             
         elif results.content_cards:
-            st.markdown("### 🎯 Relevant Content")
-            
-            # Display only the first card
-            if len(results.content_cards) > 0:
-                render_content_card(results.content_cards[0], is_main=True)
+            # Display all cards returned by the LLM (1-5 cards that form a cohesive progression)
+            for i, card in enumerate(results.content_cards):
+                render_content_card(card, is_main=(i == 0))
         
         st.markdown('</div>', unsafe_allow_html=True)
         

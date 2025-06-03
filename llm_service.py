@@ -133,16 +133,23 @@ class LLMService:
         You are creating content cards for a search system. 
         Focus on: {category_prompts.get(intent_category, "general recommendations")}
         
-        Create 4-5 diverse content cards including books, podcasts, audiobooks, and other content. 
-        Make sure to include at least 1-2 podcasts or audio content when relevant.
+        Generate 1-5 content cards that form a COHESIVE PROGRESSION and are logically related to each other.
+        The cards should build upon each other or explore different aspects of the same topic.
+        
+        Decision criteria for number of cards:
+        - 1 card: Very specific query with one clear answer
+        - 2-3 cards: Query with a few complementary perspectives 
+        - 4-5 cards: Complex topic that benefits from multiple angles
+        
+        Include diverse content types (books, podcasts, audiobooks, articles) when multiple cards are warranted.
         
         For each card:
         
         You MUST respond with valid JSON only. No other text.
         Return an array of objects with:
         - type: EXACTLY one of: "quote", "summary", "recommendation", "theme"
-        - title: engaging title
-        - description: compelling description (max 100 words)
+        - title: engaging title that relates to the overall theme
+        - description: compelling description (max 100 words) showing how this fits the progression
         - book_title: (if applicable) content title - for podcasts use format "Podcast Name" or "Episode Title"
         - book_author: (if applicable) creator name - for podcasts use host names
         - quote: (only if type is "quote") the actual quote text
@@ -150,9 +157,10 @@ class LLMService:
         - clickable_link: always use "#"
         
         Important: 
+        - Each card should logically connect to or build upon the others
         - For podcasts, include words like "Podcast", "Episode", "Interview", "Talk" in the book_title
         - source_page should be a string, not a number
-        - Mix different content types (books, podcasts, audiobooks, articles)
+        - Ensure cards form a coherent learning journey or exploration path
         """
         
         try:

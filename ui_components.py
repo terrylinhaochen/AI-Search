@@ -44,138 +44,43 @@ def render_suggestion_card():
     """, unsafe_allow_html=True)
 
 def render_content_card(card: ContentCard, is_main: bool = False):
-    """Render individual content card using Streamlit components with proper container styling"""
+    """Render individual content card with three simple components: title, reason, book info"""
     
-    # Card styling configuration
+    # Card styling configuration for colors and icons
     card_styles = {
-        "quote": {"icon": "💬", "color": "#2383e2", "type_name": "Quote"},
-        "summary": {"icon": "📄", "color": "#10b981", "type_name": "Summary"},
-        "recommendation": {"icon": "⭐", "color": "#8b5cf6", "type_name": "Recommendation"},
-        "theme": {"icon": "🎭", "color": "#f59e0b", "type_name": "Theme"},
-        "podcast": {"icon": "🎧", "color": "#e74c3c", "type_name": "Podcast"},
-        "error": {"icon": "⚠️", "color": "#ef4444", "type_name": "Error"}
+        "quote": {"icon": "💬", "color": "#2383e2"},
+        "summary": {"icon": "📄", "color": "#10b981"},
+        "recommendation": {"icon": "⭐", "color": "#8b5cf6"},
+        "theme": {"icon": "🎭", "color": "#f59e0b"},
+        "podcast": {"icon": "🎧", "color": "#e74c3c"},
+        "error": {"icon": "⚠️", "color": "#ef4444"}
     }
     
     style = card_styles.get(card.type, card_styles["recommendation"])
     
-    # Check if content is playable
-    is_playable = (card.book_title and 
-                   any(word in card.book_title.lower() 
-                       for word in ['podcast', 'episode', 'interview', 'talk', 'audio']))
-    
-    # Create a properly styled container for the entire card
+    # 1. TITLE COMPONENT
     with st.container():
-        # Apply CSS styling to the container
-        st.markdown(f"""
-        <style>
-        .content-card {{
-            border-left: 4px solid {style['color']};
-            background: #fafafa;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 20px 0;
-            border: 1px solid #e9e9e7;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }}
-        .card-header {{
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-        }}
-        .card-icon {{
-            background: {style['color']}; 
-            color: white; 
-            width: 40px; 
-            height: 40px; 
-            border-radius: 50%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 1.5em; 
-            margin-right: 15px;
-            flex-shrink: 0;
-        }}
-        .card-title {{
-            margin: 0;
-            font-size: {'1.4em' if is_main else '1.2em'};
-            font-weight: 600;
-            color: #2d2d2d;
-        }}
-        .card-type {{
-            color: {style['color']}; 
-            font-weight: 500; 
-            font-size: 0.9em; 
-            text-transform: uppercase; 
-            letter-spacing: 0.5px;
-            margin-top: 5px;
-        }}
-        .card-quote {{
-            background: #f8f9fa; 
-            border-left: 3px solid {style['color']}; 
-            padding: 15px; 
-            margin: 15px 0; 
-            border-radius: 6px;
-        }}
-        .card-content {{
-            margin: 15px 0;
-            line-height: 1.6;
-        }}
-        .card-book-info {{
-            background: #f0f0f0; 
-            padding: 12px; 
-            border-radius: 6px; 
-            margin-top: 15px; 
-            border-left: 3px solid {style['color']};
-        }}
-        </style>
-        <div class="content-card">
-        """, unsafe_allow_html=True)
-        
-        # Header section with icon, title, and type
-        st.markdown(f"""
-        <div class="card-header">
-            <div class="card-icon">{style['icon']}</div>
-            <div>
-                <div class="card-title">{card.title}</div>
-                <div class="card-type">{style['type_name']}</div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Quote section for quote cards
-        if card.type == "quote" and card.quote:
-            st.markdown(f"""
-            <div class="card-quote">
-                <em style="font-size: 1.1em; color: #2d2d2d; line-height: 1.5;">
-                    "{card.quote}"
-                </em>
-            </div>
-            """, unsafe_allow_html=True)
-        
-        # Play button for audio content
-        if is_playable:
-            if st.button(f"▶️ Play", key=f"play_{hash(card.title)}", type="secondary"):
-                st.success("🎧 Audio content would play here!")
-        
-        # Description
-        st.markdown(f'<div class="card-content">{card.description}</div>', unsafe_allow_html=True)
-        
-        # Book/Content info section
+        st.markdown(f"## {style['icon']} {card.title}")
+    
+    # 2. RECOMMENDATION REASON COMPONENT  
+    with st.container():
+        st.markdown(f"**Why this content:** {card.description}")
+    
+    # 3. BOOK/CONTENT COMPONENT
+    with st.container():
         if card.book_title:
-            source_info = f" ({card.source_page})" if card.source_page else ""
-            st.markdown(f"""
-            <div class="card-book-info">
-                <strong style="color: #2d2d2d;">📖 {card.book_title}</strong><br>
-                <span style="color: #666;">by {card.book_author}</span>{source_info}
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown(f"**📖 {card.book_title}**")
+            if card.book_author:
+                st.markdown(f"*by {card.book_author}*")
+            if card.source_page:
+                st.markdown(f"*{card.source_page}*")
         
-        # Clickable link
-        if card.clickable_link and card.clickable_link != "#":
-            st.markdown(f"[🔗 Learn More]({card.clickable_link})")
-        
-        # Close the card container
-        st.markdown("</div>", unsafe_allow_html=True)
+        # Quote section (if applicable)
+        if card.type == "quote" and card.quote:
+            st.markdown(f"> *\"{card.quote}\"*")
+    
+    # Add some spacing
+    st.markdown("---")
 
 def render_book_recommendation(recommendation: BookRecommendation):
     """Render specific content recommendation"""
